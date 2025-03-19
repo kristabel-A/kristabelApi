@@ -30,7 +30,7 @@ app.get("/users", (req,res)=> {
 app.post("/totalOrder", (req,res)=>{
     carts=[
             {
-            name:"Laptop",
+            name:"Perfume",
             price:3,
             qty:3
             }, 
