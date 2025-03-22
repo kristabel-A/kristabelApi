@@ -57,11 +57,11 @@ app.get("/",(req,res)=>{
     res.status(200).json({data:"done"})
     })
 
-const PORT = 8000
+//const PORT = 8000
 
 //() is a callback , if we remove it it'll work but we won't be able to return con.log  
-app.listen(PORT,()=>{
-    console.log(`server running on port http://localhost:${PORT}`)
-})
+// app.listen(PORT,()=>{
+//     console.log(`server running on port http://localhost:${PORT}`)
+// })
 
 module.exports = app;
