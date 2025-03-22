@@ -7,6 +7,8 @@
 const express = require('express') //module that returns a class
 const app = express()  //initializing the class ,. it has a function called json on  line 10
 
+const bcrypt = require('bcryptjs')
+
 app.use(express.json())
 
 app.get("/users", (req,res)=> {
@@ -60,7 +62,15 @@ app.get("/",(req,res)=>{
 app.post("/createUser",(req,res)=>{
     // const firstName = req.body ---- normal way but longer lines. below is dest method
     // const lastName = req.body
-    const {firstName, lastName, email, password} = req.body 
+    const {firstName, lastName, email} = req.body 
+    const salt = bcrypt.genSalt(10)
+    const hashedPassword = bcrypt.hash(password,salt) //what we use when saving. can't be decrypted
+    const userData = {
+        firstName,
+        lastName,
+        email, 
+        password:hashedPassword
+     }
     if(!firstName) {
         return res.status(404).json({error:"First Name is required",status:404})
     }
@@ -73,8 +83,9 @@ app.post("/createUser",(req,res)=>{
     if(!password) {
         return res.status(404).json({error:"Password is required",status:404})
     }
-        return res.status(201).json({message:"User Created Successfully", statis:201}) // 200 can be used aswell
+        return res.status(201).json({message:"User Created Successfully", status:201,data:userData}) // 200 can be used aswell  
 }) //create user details and save in database. payload. req is used to collect payload from users. normal or destructuring method
+
 
 //const PORT = 8000
 
