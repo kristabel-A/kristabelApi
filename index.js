@@ -57,6 +57,25 @@ app.get("/",(req,res)=>{
     res.status(200).json({data:"done"})
     })
 
+app.post("/createUser",(req,res)=>{
+    // const firstName = req.body ---- normal way but longer lines. below is dest method
+    // const lastName = req.body
+    const {firstName, lastName, email, password} = req.body 
+    if(!firstName) {
+        return res.status(404).json({error:"First Name is required",status:404})
+    }
+    if(!lastName) {
+        return res.status(404).json({error:"Last Name is required",status:404})
+    }
+    if(!email) {
+        return res.status(404).json({error:"Email is required",status:404})
+    }
+    if(!password) {
+        return res.status(404).json({error:"Password is required",status:404})
+    }
+        return res.status(201).json({message:"User Created Successfully", statis:201}) // 200 can be used aswell
+}) //create user details and save in database. payload. req is used to collect payload from users. normal or destructuring method
+
 //const PORT = 8000
 
 //() is a callback , if we remove it it'll work but we won't be able to return con.log  
