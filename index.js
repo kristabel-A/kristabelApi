@@ -58,18 +58,20 @@ app.post("/totalOrder", (req,res)=>{
 app.get("/",(req,res)=>{
     res.status(200).json({data:"done"})
     })
+//illegal pafram was seeing string and an object becayse we didnt use await and async
 
-app.post("/createUser",(req,res)=>{
+app.post("/createUser",async(req,res)=>{
     // const firstName = req.body ---- normal way but longer lines. below is dest method
     // const lastName = req.body
-    const {firstName, lastName, email} = req.body 
-    const salt = bcrypt.genSalt(10)
-    const hashedPassword = bcrypt.hash(password,salt) //what we use when saving. can't be decrypted
+    const {firstName, lastName, email, password} = req.body 
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password,salt) //what we use when saving. can't be decrypted
+   // console.log(hashedPassword) -helped us debug to see where error 
     const userData = {
         firstName,
         lastName,
         email, 
-        password:hashedPassword
+        hashedPassword
      }
     if(!firstName) {
         return res.status(404).json({error:"First Name is required",status:404})
@@ -94,4 +96,4 @@ app.post("/createUser",(req,res)=>{
 //     console.log(`server running on port http://localhost:${PORT}`)
 // })
 
-module.exports = app;
+ module.exports = app;
