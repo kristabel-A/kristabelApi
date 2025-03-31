@@ -1,99 +1,100 @@
-// /getUsers -- should return a json array of users. add a property message that says  retrieved successfully
-// Veetech Programming
+const express = require('express')
+app = express()
 
-// /totalOrder -- should return an array of cart that has name,price,and qty. so this endpoint should return the total amount (price * qty)
-// your server should run on port 8000.
-
-const express = require('express') //module that returns a class
-const app = express()  //initializing the class ,. it has a function called json on  line 10
+const fs = require('fs').promises
 
 const bcrypt = require('bcryptjs')
 
+const path = require('path')
+
 app.use(express.json())
 
-app.get("/users", (req,res)=> {
-    const users =[{
-        name:"Tomi",
-        occupation:"Lawyer",
-        jobCode:"514"
-    },
-    {
-        name:"Chidera",
-        occupation:"Accountant",
-        jobCode:"524"
-    }
-    ]
-    return res 
-        .status(200)
-        .json({message:"successfully retrieved",data:users})
+//TASK -> make them Dynamic
+// --Create promise for 
+// readPromiseFile
 
+// app.post("/readPromiseFile", (req,res)=>{
+//     fs.readFile("uploads/output.txt","utf8").then((data)=>{
+//         res.status(200).json({message:"successful", data})
+//     }).catch((error)=>{
+//         res.status(500).json({message:"An error occured", errMsg:error}) //500-int server error, 400
+
+//     })//the then has callback with 1 param
+// })
+
+app.post("/readPromiseFile", async(req,res)=>{
+    const {fileName} = req.body
+    await fs.readFile(`uploads/${fileName}.txt`,"utf8").then((data)=>{
+        console.log(fileName)
+        res.status(200).json({message:"successful", data})
+    }).catch((error)=>{
+        res.status(500).json({message:"An error occured", errMsg:error}) //500-int server error, 400
+
+    })//the then has callback with 1 param
+})
+    
+
+    
+app.post("/appendPromiseFile", (req,res) =>{
+    const {fileName} = req.body
+    fs.appendFile(`uploads/${fileName}.txt`, "\nThis is a new entry").then((data)=>{
+        res.status(200).json({message:"successful", data})  
+    }).catch((error)=>{
+        res.status(500).json({message:"An error occured", errMsg:error})   
+    })
+})
+// deletePromiseFile
+
+app.post("/deletePromiseFile", (req,res)=>{
+    const {fileName} = req.body
+    fs.unlink(`uploads/${fileName}.txt`).then((data)=>{
+        res.status(200).json({message:"successfully deleted the file", data})
+    }).catch((error)=>{
+        res.status(500).json({message:"An error occured while deleting the file", errMsg:error}) //500-int server error, 400
+    })//the then has callback with 1 param
 })
 
-app.post("/totalOrder", (req,res)=>{
-    carts=[
-            {
-            name:"Perfume",
-            price:3,
-            qty:3
-            }, 
-            {
-            name:"Loius Vuitton",
-            price:20,
-            qty:5
-            },
-            {
-            name:"Macbook M1",
-            price: 10,
-            qty:1
-            }
-        ]; 
-    let totalPrice = carts.reduce((total,item)=> total+item.price * item.qty,0)
-        console.log(totalPrice)
-        return res
-        .status(200)
-        .json({message:"successfully retrieved",data:totalPrice,products:carts}) 
-}          
-) 
+// checkIfFileExists
+app.post("/checkIfFileExists", async(req,res) =>{
+    const {fileName} = req.body
+    try{
+    await fs.access(`uploads/${fileName}.txt`).then((data)=>{
+        res.status(200).json({message:"successful", data})
+    }).catch((error)=>{
+        res.status(500).json({message:"An error occured", errMsg:error}) //500-int server error, 400
+    })//the then has callback with 1 param
+    }
+    catch(err){
+        res.status(404).json({message:"An error occured, file not found"})
+    }
+})
 
-app.get("/",(req,res)=>{
-    res.status(200).json({data:"done"})
+app.post("/createDirectory", async(req,res)=>{
+    try{
+   await fs.mkdir("photos", (err)=>{  //path where the directory would be made, calll back func
+        if (err){
+            console.log("An error occured when creating directory")
+           return res.status(500).json({message:"An error occured, file not found"})  ///return can be here or underneath   
+        }
     })
-//illegal pafram was seeing string and an object becayse we didnt use await and async
-
-app.post("/createUser",async(req,res)=>{
-    // const firstName = req.body ---- normal way but longer lines. below is dest method
-    // const lastName = req.body
-    const {firstName, lastName, email, password} = req.body 
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password,salt) //what we use when saving. can't be decrypted
-   // console.log(hashedPassword) -helped us debug to see where error 
-    const userData = {
-        firstName,
-        lastName,
-        email, 
-        hashedPassword
-     }
-    if(!firstName) {
-        return res.status(404).json({error:"First Name is required",status:404})
+    return res.status(200).json({message:"Directory created successfully"})
     }
-    if(!lastName) {
-        return res.status(404).json({error:"Last Name is required",status:404})
+    catch(err){
+        console.log(err)
     }
-    if(!email) {
-        return res.status(404).json({error:"Email is required",status:404})
-    }
-    if(!password) {
-        return res.status(404).json({error:"Password is required",status:404})
-    }
-        return res.status(201).json({message:"User Created Successfully", status:201,data:userData}) // 200 can be used aswell  
-}) //create user details and save in database. payload. req is used to collect payload from users. normal or destructuring method
+})
 
-
-//const PORT = 8000
-
-//() is a callback , if we remove it it'll work but we won't be able to return con.log  
+//making path dynamic to different servers ready for deployment.. read the path directory of the server and any system and get absolute path
+//for the system
+//more professionally, use path lib, then join
+app.get("/paths",(req,res)=>{
+    const filePath = path.join(__dirname, "package.json")
+    res.status(200).json({data:filePath})
+    //console.log(__dirname) //will give abs path to index .js __dirname(absolute) , __fileName
+})
+// const PORT = 8000
 // app.listen(PORT,()=>{
 //     console.log(`server running on port http://localhost:${PORT}`)
 // })
 
- module.exports = app;
+module.exports = app;
